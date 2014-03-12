@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
+<script type="text/javascript" src="/assets/js/modernizr.js" >
+</script>
+<link href='http://fonts.googleapis.com/css?family=Lato:300,400,300italic,400italic' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+<div class="wrapper">
+<div class="pellet-wrapper">
+  <div class="pellet"></div>
+  <div class="glow-wrapper">
+    <div class="left-anim-wrapper">
+      <div class="top-anim-wrapper">
+        <div class="pellet-glow"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="title"><img class="radioactive-svg" src="/assets/img/radioactive.svg" />plutonium.io</p>
+<p style="margin-top: 10px;" class="text">web development<span class="bullet">&bull;</span>design<span class="bullet">&bull;</span>custom solutions</p>
+<h2 class="contact-heading"><em>In need of a solution?  Let us know!</em></h2>
+
+<form id="contact-form" name="contact-form" method="post" action="/contact">
+
+<textarea id="message" name="message" placeholder="Enter your project details here and we'll reach out to you">Enter your project details here and we'll reach out to you</textarea>
+
+<div class="contact-info-fields">
+  <input id="name" name="name" type="text" placeholder="Name"/>
+  <input id="email" name="email" type="text" placeholder="Email"/>
+  <input name="_csrf" type="hidden" value="<%= locals.csrftoken %>" />
+</div>
+<input id="submit" type="submit" value="Submit"/>
+
+</form>
+
+<script>
+var form = document.getElementById("contact-form");
+form.onsubmit = function(event) {
+  event.preventDefault();
+
+  // convert form to JS object
+  var data = {};
+  for (var i = 0; i < form.length; i++) {
+    var el = form[i];
+    if (el.name) {
+      data[el.name] = el.value;
+    }
+  }
+
+  // send data
+  var xhr = new XMLHttpRequest();
+  xhr.open(form.method, form.action, true);
+  xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+  xhr.send(JSON.stringify(data));
+
+  // receive response
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      /* Do stuff with the errors */
+    }
+  };
+}
+
+// modernizr for placeholder
+if (Modernizr.input.placeholder) {
+  var textAreaElements = document.getElementsByTagName('textarea');
+  for (var i = 0; i < textAreaElements.length; i++) {
+    textAreaElements[i].value = "";
+  }
+} else {
+  HTMLInputElement.prototype.setValue = function() {
+    this.value = this.nameToValue();
+  }
+
+  HTMLInputElement.prototype.clearValue = function() {
+    this.value = "";
+  }
+
+  HTMLInputElement.prototype.checkFocus = function() {
+    if (this.value === this.nameToValue()) {
+      this.clearValue();
+    }
+  }
+  
+  HTMLInputElement.prototype.checkBlur = function() {
+    if (this.value === "") {
+      this.setValue();
+    }
+  }
+
+  HTMLInputElement.prototype.nameToValue = function() {
+    return this.name.charAt(0).toUpperCase() + this.name.slice(1);
+  }
+
+  HTMLTextAreaElement.prototype.setValue = 
+      HTMLInputElement.prototype.setValue;
+  HTMLTextAreaElement.prototype.clearValue = 
+      HTMLInputElement.prototype.clearValue;
+  HTMLTextAreaElement.prototype.checkFocus = 
+      HTMLInputElement.prototype.checkFocus;
+  HTMLTextAreaElement.prototype.checkBlur = 
+      HTMLInputElement.prototype.checkBlur;
+
+  HTMLTextAreaElement.prototype.nameToValue = function() {
+    return this.valueHolder;
+  }
+
+  // initialize all inputs
+  var inputElements = document.getElementsByTagName('input');
+  for (var i = 0; i < inputElements.length; i++) {
+    if (inputElements[i].type.toLowerCase() === "text") {
+      inputElements[i].setValue();
+      inputElements[i].onfocus = inputElements[i].checkFocus;
+      inputElements[i].onblur = inputElements[i].checkBlur;
+    }
+  }
+
+  // initialize all inputs
+  var textAreaElements = document.getElementsByTagName('textarea');
+  for (var i = 0; i < textAreaElements.length; i++) {
+    textAreaElements[i].valueHolder = textAreaElements[i].value;
+    textAreaElements[i].onfocus = textAreaElements[i].checkFocus;
+    textAreaElements[i].onblur = textAreaElements[i].checkBlur;
+  }
+}
+</script>
+</div>
+
+</body>
