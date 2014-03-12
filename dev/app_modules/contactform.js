@@ -54,8 +54,10 @@ exports.insert = function(client, data, callback) {
 }
 
 function emailFieldError(string) {
-  if (string.length == 0 && string.length <= 128) {
-    return "Please enter your email address.";
+  if (string.length == 0) {
+    return "Please enter your email address";
+  } else if (string.length > 100) {
+    return "Maximum email length exceeded";
   } else {
     var at = string.indexOf('@');
     var period = string.indexOf('.');
@@ -64,23 +66,27 @@ function emailFieldError(string) {
         return false;
       }
     }
-    return "Please enter a valid email address.";
+    return "Please enter a valid email address";
   }
 }
 
 // Could use /^([A-z]|\s)+$/ to include only letters and spaces,
 // but I am going to just return true for the time being (Umlauts? Accents? etc)
 function nameFieldError(string) {
-  if (string.length == 0 <= 128) {
-    return "Please enter your name.";
+  if (string.length == 0) {
+    return "Please enter your name";
+  } else if (string.length > 60) {
+    return "Maximum name length exceeded";
   } else {
     return false;
   }
 }
 
 function messageFieldError(string) {
-  if (string.length == 0 && string.length <= 600) {
-    return "Please enter your project details.";
+  if (string.length == 0) {
+    return "Please enter your project details";
+  } else if (string.length > 400) {
+    return "Message length exceeded by " + (string.length - 400) + " characters"; 
   } else {
     return false;
   }

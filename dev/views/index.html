@@ -21,23 +21,52 @@
 </div>
 
 <p class="title"><img class="radioactive-svg" src="/assets/img/radioactive.svg" />plutonium.io</p>
-<p style="margin-top: 10px;" class="text">web development<span class="bullet">&bull;</span>design<span class="bullet">&bull;</span>custom solutions</p>
-<h2 class="contact-heading"><em>In need of a solution?  Let us know!</em></h2>
-
-<form id="contact-form" name="contact-form" method="post" action="/contact">
-
-<textarea id="message" name="message" placeholder="Enter your project details here and we'll reach out to you">Enter your project details here and we'll reach out to you</textarea>
-
-<div class="contact-info-fields">
-  <input id="name" name="name" type="text" placeholder="Name"/>
-  <input id="email" name="email" type="text" placeholder="Email"/>
-  <input name="_csrf" type="hidden" value="<%= locals.csrftoken %>" />
+<div class="services-wrap">
+  <p class="services">web development</p><span class="bullet">&bull;</span><p class="services">design</p><span class="bullet">&bull;</span><p class="services">custom solutions</p>
 </div>
-<input id="submit" type="submit" value="Submit"/>
+<div id="contact">
+  <div class="contact-heading-wrap">
+  <h2 class="contact-heading"><em>In need of a solution?</em></h2><h2 class="contact-heading"><em>&nbsp;&nbsp;Let us know!&nbsp;&nbsp;</em></h2></div>
 
-</form>
+  <form id="contact-form" name="contact-form" method="post" action="/contact">
+
+  <div class="field-wrapper">
+    <label id="message-floatlabel" class="floatlabel" for="message"></label>
+    <textarea id="message" name="message" placeholder="Enter your project details here and we'll reach out to you">Enter your project details here and we'll reach out to you</textarea>
+  </div>
+
+  <div id="contact-info-fields">
+    <div class="field-wrapper">
+      <label id="name-floatlabel" class="floatlabel" for="name"></label>
+      <input id="name" name="name" type="text" placeholder="Name"/>
+    </div>
+    <div class="field-wrapper">
+      <label id="email-floatlabel" class="floatlabel" for="email"></label>
+      <input id="email" name="email" type="text" placeholder="Email"/>
+    </div>
+    <input name="_csrf" type="hidden" value="<%= locals.csrftoken %>" />
+  </div>
+  <input id="submit" type="submit" value="Submit"/>
+
+  </form>
+</div>
+
+<div id="thankyou" class="contact-heading-wrap">
+  <h2 class="contact-heading"><em>&nbsp;&nbsp;Thank you!&nbsp;&nbsp;</em></h2><h2 class="contact-heading"><em>You'll hear from us soon!</em></h2></div>
 
 <script>
+var nameField = document.getElementById('name');
+var emailField = document.getElementById('email');
+var messageField = document.getElementById('message');
+
+var nameLabel = document.getElementById('name-floatlabel');
+var emailLabel = document.getElementById('email-floatlabel');
+var messageLabel = document.getElementById('message-floatlabel');
+
+var contactFields = document.getElementById('contact-info-fields');
+var contact = document.getElementById('contact');
+var thankyou = document.getElementById('thankyou');
+
 var form = document.getElementById("contact-form");
 form.onsubmit = function(event) {
   event.preventDefault();
@@ -58,11 +87,69 @@ form.onsubmit = function(event) {
   xhr.send(JSON.stringify(data));
 
   // receive response
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4) {
-      /* Do stuff with the errors */
+  xhr.onload = function() { 
+    /* Do stuff with the errors */
+    window.res = JSON.parse(xhr.responseText);
+    if (res.error) {
+      handleErrorResponse(res.error);
+    } else if (res.ok) {
+      handleSuccessResponse();
     }
+    console.log(res)
   };
+}
+
+function handleSuccessResponse() {
+  clearErrors({});
+  contact.className += " hide";
+  thankyou.style.display = "block";
+  setTimeout(
+    function() { 
+      contact.style.display = "none" 
+      thankyou.className += " show";
+    }, 1000);
+}
+
+function handleErrorResponse(err) {
+  clearErrors(err);
+
+  if (err.name) {
+    nameField.className += ' error';
+    nameLabel.innerHTML = err.name;
+
+    if (!/\berror\b/.test(contactFields.className)) {
+      contactFields.className += ' error';
+    }
+  }
+
+  if (err.email) {
+    emailField.className += ' error';
+    emailLabel.innerHTML = err.email;
+
+    // add the error to contact-info-fields only once
+    if (!/\berror\b/.test(contactFields.className)) {
+      contactFields.className += ' error';
+    }
+  }
+
+  if (err.message) {
+    messageField.className += ' error';
+    messageLabel.innerHTML = err.message;
+  }
+}
+
+function clearErrors(err) {
+  nameField.className = nameField.className.replace(/\s*\berror\b/, "");
+  emailField.className = emailField.className.replace(/\s*\berror\b/, "");
+  messageField.className = messageField.className.replace(/\s*\berror\b/, "");
+
+  nameLabel.innerHTML = "";
+  emailLabel.innerHTML = "";
+  messageLabel.innerHTML = "";
+
+  if (!err.name && !err.email) {
+    contactFields.className = contactFields.className.replace(/\s*\berror\b/, "");
+  }
 }
 
 // modernizr for placeholder
