@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
+<script type="text/javascript" src="/assets/js/modernizr.js" >
+</script>
+<link href='http://fonts.googleapis.com/css?family=Lato:300,400,300italic,400italic' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+<div class="wrapper">
+<div class="pellet-wrapper">
+  <div class="pellet"></div>
+  <div class="glow-wrapper">
+    <div class="left-anim-wrapper">
+      <div class="top-anim-wrapper">
+        <div class="pellet-glow"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="title"><img class="radioactive-svg" src="/assets/img/radioactive.svg" />plutonium.io</p>
+<div class="services-wrap">
+  <p class="services">web development</p><span class="bullet">&bull;</span><p class="services">design</p><span class="bullet">&bull;</span><p class="services">custom solutions</p>
+</div>
+<div id="contact">
+  <div class="contact-heading-wrap">
+  <h2 class="contact-heading"><em>In need of a solution?</em></h2><h2 class="contact-heading"><em>&nbsp;&nbsp;Let us know!&nbsp;&nbsp;</em></h2></div>
+
+  <form id="contact-form" name="contact-form" method="post" action="/contact">
+
+  <div class="field-wrapper">
+    <label id="message-floatlabel" class="floatlabel" for="message"></label>
+    <textarea id="message" name="message" placeholder="Enter your project details here and we'll reach out to you">Enter your project details here and we'll reach out to you</textarea>
+  </div>
+
+  <div id="contact-info-fields">
+    <div class="field-wrapper">
+      <label id="name-floatlabel" class="floatlabel" for="name"></label>
+      <input id="name" name="name" type="text" placeholder="Name"/>
+    </div>
+    <div class="field-wrapper">
+      <label id="email-floatlabel" class="floatlabel" for="email"></label>
+      <input id="email" name="email" type="text" placeholder="Email"/>
+    </div>
+    <input name="_csrf" type="hidden" value="<%= locals.csrftoken %>" />
+  </div>
+  <input id="submit" type="submit" value="Submit"/>
+
+  </form>
+</div>
+
+<div id="thankyou" class="contact-heading-wrap">
+  <h2 class="contact-heading"><em>&nbsp;&nbsp;Thank you!&nbsp;&nbsp;</em></h2><h2 class="contact-heading"><em>You'll hear from us soon!</em></h2></div>
+
+<script>
+var nameField = document.getElementById('name');
+var emailField = document.getElementById('email');
+var messageField = document.getElementById('message');
+
+var nameLabel = document.getElementById('name-floatlabel');
+var emailLabel = document.getElementById('email-floatlabel');
+var messageLabel = document.getElementById('message-floatlabel');
+
+var contactFields = document.getElementById('contact-info-fields');
+var contact = document.getElementById('contact');
+var thankyou = document.getElementById('thankyou');
+
+var form = document.getElementById("contact-form");
+form.onsubmit = function(event) {
+  event.preventDefault();
+
+  // convert form to JS object
+  var data = {};
+  for (var i = 0; i < form.length; i++) {
+    var el = form[i];
+    if (el.name) {
+      data[el.name] = el.value;
+    }
+  }
+
+  // send data
+  var xhr = new XMLHttpRequest();
+  xhr.open(form.method, form.action, true);
+  xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+  xhr.send(JSON.stringify(data));
+
+  // receive response
+  xhr.onload = function() { 
+    /* Do stuff with the errors */
+    window.res = JSON.parse(xhr.responseText);
+    if (res.error) {
+      handleErrorResponse(res.error);
+    } else if (res.ok) {
+      handleSuccessResponse();
+    }
+    console.log(res)
+  };
+}
+
+function handleSuccessResponse() {
+  clearErrors({});
+  contact.className += " hide";
+  thankyou.style.display = "block";
+  setTimeout(
+    function() { 
+      contact.style.display = "none" 
+      thankyou.className += " show";
+    }, 1000);
+}
+
+function handleErrorResponse(err) {
+  clearErrors(err);
+
+  if (err.name) {
+    nameField.className += ' error';
+    nameLabel.innerHTML = err.name;
+
+    if (!/\berror\b/.test(contactFields.className)) {
+      contactFields.className += ' error';
+    }
+  }
+
+  if (err.email) {
+    emailField.className += ' error';
+    emailLabel.innerHTML = err.email;
+
+    // add the error to contact-info-fields only once
+    if (!/\berror\b/.test(contactFields.className)) {
+      contactFields.className += ' error';
+    }
+  }
+
+  if (err.message) {
+    messageField.className += ' error';
+    messageLabel.innerHTML = err.message;
+  }
+}
+
+function clearErrors(err) {
+  nameField.className = nameField.className.replace(/\s*\berror\b/, "");
+  emailField.className = emailField.className.replace(/\s*\berror\b/, "");
+  messageField.className = messageField.className.replace(/\s*\berror\b/, "");
+
+  nameLabel.innerHTML = "";
+  emailLabel.innerHTML = "";
+  messageLabel.innerHTML = "";
+
+  if (!err.name && !err.email) {
+    contactFields.className = contactFields.className.replace(/\s*\berror\b/, "");
+  }
+}
+
+// modernizr for placeholder
+if (Modernizr.input.placeholder) {
+  var textAreaElements = document.getElementsByTagName('textarea');
+  for (var i = 0; i < textAreaElements.length; i++) {
+    textAreaElements[i].value = "";
+  }
+} else {
+  HTMLInputElement.prototype.setValue = function() {
+    this.value = this.nameToValue();
+  }
+
+  HTMLInputElement.prototype.clearValue = function() {
+    this.value = "";
+  }
+
+  HTMLInputElement.prototype.checkFocus = function() {
+    if (this.value === this.nameToValue()) {
+      this.clearValue();
+    }
+  }
+  
+  HTMLInputElement.prototype.checkBlur = function() {
+    if (this.value === "") {
+      this.setValue();
+    }
+  }
+
+  HTMLInputElement.prototype.nameToValue = function() {
+    return this.name.charAt(0).toUpperCase() + this.name.slice(1);
+  }
+
+  HTMLTextAreaElement.prototype.setValue = 
+      HTMLInputElement.prototype.setValue;
+  HTMLTextAreaElement.prototype.clearValue = 
+      HTMLInputElement.prototype.clearValue;
+  HTMLTextAreaElement.prototype.checkFocus = 
+      HTMLInputElement.prototype.checkFocus;
+  HTMLTextAreaElement.prototype.checkBlur = 
+      HTMLInputElement.prototype.checkBlur;
+
+  HTMLTextAreaElement.prototype.nameToValue = function() {
+    return this.valueHolder;
+  }
+
+  // initialize all inputs
+  var inputElements = document.getElementsByTagName('input');
+  for (var i = 0; i < inputElements.length; i++) {
+    if (inputElements[i].type.toLowerCase() === "text") {
+      inputElements[i].setValue();
+      inputElements[i].onfocus = inputElements[i].checkFocus;
+      inputElements[i].onblur = inputElements[i].checkBlur;
+    }
+  }
+
+  // initialize all inputs
+  var textAreaElements = document.getElementsByTagName('textarea');
+  for (var i = 0; i < textAreaElements.length; i++) {
+    textAreaElements[i].valueHolder = textAreaElements[i].value;
+    textAreaElements[i].onfocus = textAreaElements[i].checkFocus;
+    textAreaElements[i].onblur = textAreaElements[i].checkBlur;
+  }
+}
+</script>
+</div>
+
+</body>
