@@ -1,4 +1,3 @@
-node_canvas
+Plutonium App
 ===========
-
-A simple Node webserver to serve static files (i.e. webpages) so I can play around with the Canvas element.  Will deploy to Heroku.
+A simple landing page to handle leads for plutonium.io
